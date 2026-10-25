@@ -1058,6 +1058,7 @@ jobs:
             APP_PATH="./flutter/build/macos/Build/Products/Release/RustDesk.app"
             APP_NAME="RustDesk.app"
           fi
+          codesign --force --deep -s - "$APP_PATH"
           create-dmg --volname "Sumus Remoto" --icon "$APP_NAME" 200 190 --hide-extension "$APP_NAME" --window-size 800 400 --app-drop-link 600 185 "Sumus-Remoto-${{ matrix.job.arch }}.dmg" "$APP_PATH"
           cp "Sumus-Remoto-${{ matrix.job.arch }}.dmg" "Sumus-Remoto-${{ env.VERSION }}-${{ matrix.job.arch }}.dmg"
           cp "Sumus-Remoto-${{ matrix.job.arch }}.dmg" "rustdesk-${{ env.VERSION }}-${{ matrix.job.arch }}.dmg"

@@ -966,6 +966,8 @@ def build_flutter_dmg(version, features):
         base_name = os.path.splitext(app_name)[0]
         if os.path.isfile(os.path.join(exe_path, base_name)) and not os.path.exists(os.path.join(exe_path, 'RustDesk')):
             system2(f'ln -sf "{base_name}" "{exe_path}/RustDesk"')
+        # Re-sign bundle ad-hoc so sealed resources are valid and Gatekeeper does not report 'damaged'
+        system2(f'codesign --force --deep -s - "{app_dir}"')
     else:
         system2('cp -rf ../target/release/service ./build/macos/Build/Products/Release/RustDesk.app/Contents/MacOS/')
     '''
