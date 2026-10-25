@@ -946,7 +946,28 @@ def build_flutter_dmg(version, features):
     mac_arch = 'arm64' if platform.machine().lower() in ('arm64', 'aarch64') else 'x86_64'
     system2(
         f'FLUTTER_XCODE_ARCHS={mac_arch} FLUTTER_XCODE_ONLY_ACTIVE_ARCH=YES flutter build macos --release')
-    system2('cp -rf ../target/release/service ./build/macos/Build/Products/Release/RustDesk.app/Contents/MacOS/')
+    app_dir = None
+    for candidate in ['Sumus Remoto.app', 'RustDesk.app']:
+        p = os.path.join('./build/macos/Build/Products/Release', candidate)
+        if os.path.isdir(p):
+            app_dir = p
+            break
+    if not app_dir and os.path.isdir('./build/macos/Build/Products/Release'):
+        for f in os.listdir('./build/macos/Build/Products/Release'):
+            if f.endswith('.app'):
+                app_dir = os.path.join('./build/macos/Build/Products/Release', f)
+                break
+    if app_dir:
+        system2(f'cp -rf ../target/release/service "{app_dir}/Contents/MacOS/"')
+        app_name = os.path.basename(app_dir)
+        if app_name != 'RustDesk.app':
+            system2(f'ln -sfn "{app_name}" ./build/macos/Build/Products/Release/RustDesk.app')
+        exe_path = os.path.join(app_dir, 'Contents', 'MacOS')
+        base_name = os.path.splitext(app_name)[0]
+        if os.path.isfile(os.path.join(exe_path, base_name)) and not os.path.exists(os.path.join(exe_path, 'RustDesk')):
+            system2(f'ln -sf "{base_name}" "{exe_path}/RustDesk"')
+    else:
+        system2('cp -rf ../target/release/service ./build/macos/Build/Products/Release/RustDesk.app/Contents/MacOS/')
     '''
     system2(
         "create-dmg --volname \"RustDesk Installer\" --window-pos 200 120 --window-size 800 400 --icon-size 100 --app-drop-link 600 185 --icon RustDesk.app 200 190 --hide-extension RustDesk.app rustdesk.dmg ./build/macos/Build/Products/Release/RustDesk.app")
